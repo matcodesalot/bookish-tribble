@@ -1,0 +1,19 @@
+/* Mini CSS Reset */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+ol, ul {
+	list-style: none;
+}
+
+/* ------------------------- */
+
+#canvas {
+    background-color: black;
+    border: 1px solid cyan;
+    margin: 20px;
+}
