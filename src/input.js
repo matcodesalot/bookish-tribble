@@ -1,65 +1,48 @@
-export const LEFT = "LEFT";
-export const RIGHT = "RIGHT";
-export const UP = "UP";
-export const DOWN = "DOWN";
+export const keys = {
+    up: {
+        pressed: false
+    },
+    down: {
+        pressed: false
+    },
+    left: {
+        pressed: false
+    },
+    right: {
+        pressed: false
+    }
+};
 
 export class Input {
     constructor() {
-
-        this.heldDirections = [];
-
         document.addEventListener("keydown", (e) => {
             if(e.code === "ArrowUp" || e.code === "KeyW") {
-                this.onArrowPressed(UP);
+                keys.up.pressed = true;
             }
             if(e.code === "ArrowDown" || e.code === "KeyS") {
-                this.onArrowPressed(DOWN);
+                keys.down.pressed = true;
             }
             if(e.code === "ArrowLeft" || e.code === "KeyA") {
-                this.onArrowPressed(LEFT);
+                keys.left.pressed = true;
             }
             if(e.code === "ArrowRight" || e.code === "KeyD") {
-                this.onArrowPressed(RIGHT);
+                keys.right.pressed = true;
             }
         });
 
         document.addEventListener("keyup", (e) => {
             if(e.code === "ArrowUp" || e.code === "KeyW") {
-                this.onArrowReleased(UP);
+                keys.up.pressed = false;
             }
             if(e.code === "ArrowDown" || e.code === "KeyS") {
-                this.onArrowReleased(DOWN);
+                keys.down.pressed = false;
             }
             if(e.code === "ArrowLeft" || e.code === "KeyA") {
-                this.onArrowReleased(LEFT);
+                keys.left.pressed = false;
             }
             if(e.code === "ArrowRight" || e.code === "KeyD") {
-                this.onArrowReleased(RIGHT);
+                keys.right.pressed = false;
             }
         });
-    }
-
-    get direction() {
-        return this.heldDirections[0]; //Undefined if no direction key is being pressed
-    }
-
-    onArrowPressed(direction) {
-        const index = this.heldDirections.indexOf(direction);
-
-        //Add this arrow to the queue if it's new
-        if(index === -1) {
-            this.heldDirections.unshift(direction);
-        }
-    }
-
-    onArrowReleased(direction) {
-        const index = this.heldDirections.indexOf(direction);
-
-        if(index === -1) {
-            return;
-        }
-
-        //Remove this key from the list
-        this.heldDirections.splice(index, 1);
     }
 }

@@ -1,5 +1,5 @@
 import { DrawShape } from "./helpers/drawShape.js";
-import { Input, UP, DOWN, LEFT, RIGHT } from "./input.js";
+import { Input, keys } from "./input.js";
 const drawShape = new DrawShape();
 const input = new Input();
 
@@ -9,27 +9,27 @@ export class Player {
         this.width = 8;
         this.height = 8;
         this.angle = 0; //0: facing right, 3 * Math.PI / 2: facing up
-        this.moveSpeed = 5;
-        this.rotSpeed = 3;
+        this.moveSpeed = 0.5;
+        this.rotSpeed = 0.03;
     }
 
-    movement(deltaTime) {
+    movement() {
         const sinA = Math.sin(this.angle);
         const cosA = Math.cos(this.angle);
         let deltaX = 0;
         let deltaY = 0;
         
-        const speed = this.moveSpeed * deltaTime;
+        const speed = this.moveSpeed;
 
         const speedSin = speed * sinA;
         const speedCos = speed * cosA;
 
         //moving forward and backward
-        if(input.direction === UP) {
+        if(keys.up.pressed) {
             deltaX += speedCos;
             deltaY += speedSin;
         }
-        if(input.direction === DOWN) {
+        if(keys.down.pressed) {
             deltaX += -speedCos;
             deltaY += -speedSin;
         }
@@ -44,11 +44,11 @@ export class Player {
         // }
 
         //looking left and right
-        if(input.direction === LEFT) {
-            this.angle += this.rotSpeed * deltaTime;
+        if(keys.left.pressed) {
+            this.angle -= this.rotSpeed;
         }
-        if(input.direction === RIGHT) {
-            this.angle -= this.rotSpeed * deltaTime;
+        if(keys.right.pressed) {
+            this.angle += this.rotSpeed;
         }
         //if the angle goes over Math.PI * 2 or under Math.PI * 2, reset it to 0
         this.angle %= Math.PI * 2;

@@ -1,6 +1,7 @@
 import { GameLoop } from "./src/gameLoop.js";
 import { Vector2 } from "./src/vector2.js";
 import { Player } from "./src/player.js";
+import { Map } from "./src/map.js";
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -12,9 +13,11 @@ const player = new Player({
     position: new Vector2(16, 16)
 });
 
-const update = (deltaTime) => {
+const map = new Map();
+
+const update = () => {
     //Updating entities in the game
-    player.movement(deltaTime);
+    player.movement();
 }
 
 const draw = () => {
@@ -23,6 +26,9 @@ const draw = () => {
 
     //Draw player
     player.draw(ctx);
+
+    //Draw map
+    map.draw(ctx);
 }
 
 const gameLoop = new GameLoop(update, draw);
