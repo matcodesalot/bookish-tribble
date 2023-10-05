@@ -1,7 +1,7 @@
 import { DrawShape } from "./helpers/drawShape.js";
 const drawShape = new DrawShape();
 
-//0: empty space,  1: red wall,  2: green wall,  3: blue wall,  4: white wall,  5: yellow wall
+//0: empty space, 1: red wall, 2: green wall, 3: blue wall, 4: white wall, 5: yellow wall
 const map = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], 
@@ -63,6 +63,7 @@ class Wall {
 export class Map {
     constructor() {
         this.map = map
+        this.populateMap(); //Populate the map once during initialization
     }
 
     populateMap() {
@@ -70,63 +71,24 @@ export class Map {
             for (let col = 0; col < this.map[row].length; col++) {
                 const symbol = this.map[row][col];
 
-                switch(symbol) {
-                    case 1:
-                        walls.push(new Wall ({
-                            position: {
-                                x: CELL_SIZE * col,
-                                y: CELL_SIZE * row
-                            },
-                            color: "red"
-                        }));
-                        break;
-
-                    case 2:
-                        walls.push(new Wall ({
-                            position: {
-                                x: CELL_SIZE * col,
-                                y: CELL_SIZE * row
-                            },
-                            color: "green"
-                        }));
-                        break;
-
-                    case 3:
-                        walls.push(new Wall ({
-                            position: {
-                                x: CELL_SIZE * col,
-                                y: CELL_SIZE * row
-                            },
-                            color: "blue"
-                        }));
-                        break;
-
-                    case 4:
-                        walls.push(new Wall ({
-                            position: {
-                                x: CELL_SIZE * col,
-                                y: CELL_SIZE * row
-                            },
-                            color: "white"
-                        }));
-                        break;
-
-                    case 5:
-                        walls.push(new Wall ({
-                            position: {
-                                x: CELL_SIZE * col,
-                                y: CELL_SIZE * row
-                            },
-                            color: "yellow"
-                        }));
-                        break;
+                if (symbol >= 1 && symbol <= 5) {
+                    walls.push(new Wall({
+                        position: {
+                            x: CELL_SIZE * col,
+                            y: CELL_SIZE * row
+                        },
+                        color: symbol === 1 ? "red" :
+                               symbol === 2 ? "green" :
+                               symbol === 3 ? "blue" :
+                               symbol === 4 ? "white" : "yellow"
+                    }));
                 }
             }
         }
     }
 
     draw(ctx) {
-        this.populateMap();
+        //Draw the pre-populated walls
         walls.forEach((wall) => {
             wall.draw(ctx);
         });

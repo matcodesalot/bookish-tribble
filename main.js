@@ -10,7 +10,7 @@ canvas.width = 480;
 canvas.height = 480;
 
 const player = new Player({
-    position: new Vector2(16, 16)
+    position: new Vector2(240, 440)
 });
 
 const map = new Map();
@@ -24,11 +24,11 @@ const draw = () => {
     //Clear screen
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    //Draw player
-    player.draw(ctx);
-
     //Draw map
     map.draw(ctx);
+
+    //Draw player
+    player.draw(ctx);
 }
 
 const gameLoop = new GameLoop(update, draw);
