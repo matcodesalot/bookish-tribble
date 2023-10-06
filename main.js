@@ -2,6 +2,7 @@ import { GameLoop } from "./src/gameLoop.js";
 import { Vector2 } from "./src/vector2.js";
 import { Player } from "./src/player.js";
 import { Map } from "./src/map.js";
+import { Raycasting } from "./src/raycasting.js";
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -15,9 +16,9 @@ const player = new Player({
 
 const map = new Map();
 
-const update = () => {
+const update = (deltaTime) => {
     //Updating entities in the game
-    player.movement();
+    player.movement(deltaTime);
 }
 
 const draw = () => {

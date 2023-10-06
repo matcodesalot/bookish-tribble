@@ -9,52 +9,98 @@ export class Player {
         this.width = 8;
         this.height = 8;
         this.angle = 0; //0: facing right, 3 * Math.PI / 2: facing up
-        this.moveSpeed = 0.5;
-        this.rotSpeed = 0.03;
+        this.moveSpeed = 0.05;
+        this.rotSpeed = 0.003;
     }
 
-    movement() {
+    // movement(timeStep) {
+    //     const sinA = Math.sin(this.angle);
+    //     const cosA = Math.cos(this.angle);
+    //     let deltaX = 0;
+    //     let deltaY = 0;
+        
+    //     const speed = this.moveSpeed;
+
+    //     const speedSin = speed * sinA;
+    //     const speedCos = speed * cosA;
+
+    //     //moving forward and backward
+    //     if(keys.up.pressed) {
+    //         deltaX += speedCos;
+    //         deltaY += speedSin;
+    //     }
+    //     if(keys.down.pressed) {
+    //         deltaX += -speedCos;
+    //         deltaY += -speedSin;
+    //     }
+    //     //strafing left and right
+    //     // if(input.direction === LEFT) {
+    //     //     deltaX += speedSin;
+    //     //     deltaY += -speedCos;
+    //     // }
+    //     // if(input.direction === RIGHT) {
+    //     //     deltaX += -speedSin;
+    //     //     deltaY += speedCos;
+    //     // }
+
+    //     //looking left and right
+    //     if(keys.left.pressed) {
+    //         this.angle -= this.rotSpeed;
+    //     }
+    //     if(keys.right.pressed) {
+    //         this.angle += this.rotSpeed;
+    //     }
+    //     //if the angle goes over Math.PI * 2 or under Math.PI * 2, reset it to 0
+    //     this.angle %= Math.PI * 2;
+
+    //     this.position.x += deltaX;
+    //     this.position.y += deltaY;
+    // }
+
+    movement(timeStep) {
         const sinA = Math.sin(this.angle);
         const cosA = Math.cos(this.angle);
-        let deltaX = 0;
-        let deltaY = 0;
-        
-        const speed = this.moveSpeed;
 
-        const speedSin = speed * sinA;
-        const speedCos = speed * cosA;
+        const scaledMoveSpeed = this.moveSpeed * timeStep;
+
+        const deltaX = scaledMoveSpeed * cosA;
+        const deltaY = scaledMoveSpeed * sinA;
+
+        let moveX = 0;
+        let moveY = 0;
 
         //moving forward and backward
         if(keys.up.pressed) {
-            deltaX += speedCos;
-            deltaY += speedSin;
+            moveX += deltaX;
+            moveY += deltaY;
         }
         if(keys.down.pressed) {
-            deltaX += -speedCos;
-            deltaY += -speedSin;
+            moveX += -deltaX;
+            moveY += -deltaY;
         }
+
         //strafing left and right
-        // if(input.direction === LEFT) {
-        //     deltaX += speedSin;
-        //     deltaY += -speedCos;
+        // if(keys.left.pressed) {
+        //     moveX += deltaY;
+        //     moveY += -deltaX;
         // }
-        // if(input.direction === RIGHT) {
-        //     deltaX += -speedSin;
-        //     deltaY += speedCos;
+        // if(keys.right.pressed) {
+        //     moveX += -deltaY;
+        //     moveY += deltaX;
         // }
 
         //looking left and right
         if(keys.left.pressed) {
-            this.angle -= this.rotSpeed;
+            this.angle -= this.rotSpeed * timeStep;
         }
         if(keys.right.pressed) {
-            this.angle += this.rotSpeed;
+            this.angle += this.rotSpeed * timeStep;
         }
         //if the angle goes over Math.PI * 2 or under Math.PI * 2, reset it to 0
         this.angle %= Math.PI * 2;
 
-        this.position.x += deltaX;
-        this.position.y += deltaY;
+        this.position.x += moveX;
+        this.position.y += moveY;
     }
 
     draw(ctx) {
