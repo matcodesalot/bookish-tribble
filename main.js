@@ -15,6 +15,7 @@ const player = new Player({
 });
 
 const map = new Map();
+//console.log(map.walls);
 
 const update = (deltaTime) => {
     //Updating entities in the game

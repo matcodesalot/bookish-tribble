@@ -13,50 +13,6 @@ export class Player {
         this.rotSpeed = 0.003;
     }
 
-    // movement(timeStep) {
-    //     const sinA = Math.sin(this.angle);
-    //     const cosA = Math.cos(this.angle);
-    //     let deltaX = 0;
-    //     let deltaY = 0;
-        
-    //     const speed = this.moveSpeed;
-
-    //     const speedSin = speed * sinA;
-    //     const speedCos = speed * cosA;
-
-    //     //moving forward and backward
-    //     if(keys.up.pressed) {
-    //         deltaX += speedCos;
-    //         deltaY += speedSin;
-    //     }
-    //     if(keys.down.pressed) {
-    //         deltaX += -speedCos;
-    //         deltaY += -speedSin;
-    //     }
-    //     //strafing left and right
-    //     // if(input.direction === LEFT) {
-    //     //     deltaX += speedSin;
-    //     //     deltaY += -speedCos;
-    //     // }
-    //     // if(input.direction === RIGHT) {
-    //     //     deltaX += -speedSin;
-    //     //     deltaY += speedCos;
-    //     // }
-
-    //     //looking left and right
-    //     if(keys.left.pressed) {
-    //         this.angle -= this.rotSpeed;
-    //     }
-    //     if(keys.right.pressed) {
-    //         this.angle += this.rotSpeed;
-    //     }
-    //     //if the angle goes over Math.PI * 2 or under Math.PI * 2, reset it to 0
-    //     this.angle %= Math.PI * 2;
-
-    //     this.position.x += deltaX;
-    //     this.position.y += deltaY;
-    // }
-
     movement(timeStep) {
         const sinA = Math.sin(this.angle);
         const cosA = Math.cos(this.angle);
