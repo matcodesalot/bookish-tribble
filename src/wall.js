@@ -1,13 +1,14 @@
 import { DrawShape } from "./helpers/drawShape.js";
 const drawShape = new DrawShape();
 
+export const CELL_SIZE = 20;
+
 export class Wall {
     constructor({position, color}) {
         this.position = position;
         this.color = color;
-        this.CELL_SIZE = 20;
-        this.width = this.CELL_SIZE;
-        this.height = this.CELL_SIZE;
+        this.width = CELL_SIZE;
+        this.height = CELL_SIZE;
     }
     
     draw(ctx) {

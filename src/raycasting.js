@@ -8,13 +8,16 @@ export class Raycasting {
         this.maxDepth = 20;
     }
 
-    raycast(player, walls) {
+    raycast(player) {
         const ox = player.position.x;
         const oy = player.position.y;
 
         //need to loop over the walls array I think
         //const wallX = walls.position.x;
         //const wallY = walls.position.y;
+
+        const mapX = parseInt(player.position.x);
+        const mapY = parseInt(player.position.y);
         const rayAngle = player.angle - this.halfFov + 0.0001;
 
         for(let i = 0; i < this.numRays; i++) {
@@ -22,6 +25,7 @@ export class Raycasting {
             const cosA = Math.cos(rayAngle);
 
             //Verticals
+            
 
 
 

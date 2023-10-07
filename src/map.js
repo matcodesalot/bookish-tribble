@@ -1,4 +1,5 @@
 import { Wall } from "./wall.js";
+import { CELL_SIZE } from "./wall.js";
 
 //0: empty space, 1: red wall, 2: green wall, 3: blue wall, 4: white wall, 5: yellow wall
 const map = [
@@ -31,7 +32,6 @@ const map = [
 export class Map {
     constructor() {
         this.map = map;
-        this.CELL_SIZE = 20;
         this.walls = [];
         this.populateMap(); //Populate the map once during initialization
     }
@@ -44,8 +44,8 @@ export class Map {
                 if (symbol >= 1 && symbol <= 5) {
                     this.walls.push(new Wall({
                         position: {
-                            x: this.CELL_SIZE * col,
-                            y: this.CELL_SIZE * row
+                            x: CELL_SIZE * col,
+                            y: CELL_SIZE * row
                         },
                         color: symbol === 1 ? "red" :
                                symbol === 2 ? "green" :

@@ -1,7 +1,9 @@
 import { DrawShape } from "./helpers/drawShape.js";
 import { Input, keys } from "./input.js";
+import { Map } from "./map.js";
 const drawShape = new DrawShape();
 const input = new Input();
+const map = new Map();
 
 export class Player {
     constructor({position}) {
@@ -19,30 +21,30 @@ export class Player {
 
         const scaledMoveSpeed = this.moveSpeed * timeStep;
 
-        const deltaX = scaledMoveSpeed * cosA;
-        const deltaY = scaledMoveSpeed * sinA;
+        let dx = 0;
+        let dy = 0;
 
-        let moveX = 0;
-        let moveY = 0;
+        const speedSin = scaledMoveSpeed * sinA;
+        const speedCos = scaledMoveSpeed * cosA;
 
         //moving forward and backward
         if(keys.up.pressed) {
-            moveX += deltaX;
-            moveY += deltaY;
+            dx += speedCos;
+            dy += speedSin;
         }
         if(keys.down.pressed) {
-            moveX += -deltaX;
-            moveY += -deltaY;
+            dx += -speedCos;
+            dy += -speedSin;
         }
 
         //strafing left and right
         // if(keys.left.pressed) {
-        //     moveX += deltaY;
-        //     moveY += -deltaX;
+        //     dx += speedSin;
+        //     dy += -speedCos;
         // }
         // if(keys.right.pressed) {
-        //     moveX += -deltaY;
-        //     moveY += deltaX;
+        //     dx += -speedSin;
+        //     dy += speedCos;
         // }
 
         //looking left and right
@@ -55,8 +57,33 @@ export class Player {
         //if the angle goes over Math.PI * 2 or under Math.PI * 2, reset it to 0
         this.angle %= Math.PI * 2;
 
-        this.position.x += moveX;
-        this.position.y += moveY;
+        //this.position.x += dx;
+        //this.position.y += dy;
+
+        this.checkWallCollision(dx, dy);
+    }
+
+    checkWall(x, y) {
+        //Treat out of bounds as collision
+        //I think I'm using map.map wrong...
+        if (x < 0 || x >= map.map.length || y < 0 || y >= map.map[0].length) {
+            return true;
+        }
+
+        return !map.map[x][y];
+    }
+    
+    checkWallCollision(dx, dy) {
+        const newX = Math.floor(this.position.x + dx);
+        const newY = Math.floor(this.position.y + dy);
+    
+        if (this.checkWall(newX, Math.floor(this.position.y))) {
+            this.position.x += dx;
+        }
+    
+        if (this.checkWall(Math.floor(this.position.x), newY)) {
+            this.position.y += dy;
+        }
     }
 
     draw(ctx) {
