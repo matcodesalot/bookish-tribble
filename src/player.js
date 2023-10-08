@@ -73,14 +73,18 @@ export class Player {
     }
     
     checkWallCollision(dx, dy) {
-        const newX = Math.floor((this.position.x + dx) / CELL_SIZE);
-        const newY = Math.floor((this.position.y + dy) / CELL_SIZE);
+        const playerLeft = Math.floor((this.position.x + dx) / CELL_SIZE);
+        const playerRight = Math.floor((this.position.x + dx + this.width) / CELL_SIZE);
+        const playerTop = Math.floor((this.position.y + dy) / CELL_SIZE);
+        const playerBottom = Math.floor((this.position.y + dy + this.height) / CELL_SIZE);
     
-        if (!this.checkWall(newX, Math.floor(this.position.y / CELL_SIZE))) {
+        //Checking left and right of player
+        if (!this.checkWall(playerLeft, Math.floor(this.position.y / CELL_SIZE)) && !this.checkWall(playerRight, Math.floor((this.position.y + this.height) / CELL_SIZE))) {
             this.position.x += dx;
         }
     
-        if (!this.checkWall(Math.floor(this.position.x / CELL_SIZE), newY)) {
+        //checking top and bottom of player
+        if (!this.checkWall(Math.floor(this.position.x / CELL_SIZE), playerTop) && !this.checkWall(Math.floor((this.position.x + this.width) / CELL_SIZE)), playerBottom) {
             this.position.y += dy;
         }
     }
