@@ -1,9 +1,9 @@
 import { DrawShape } from "./helpers/drawShape.js";
 import { Input, keys } from "./input.js";
-import { Map } from "./map.js";
+import { output } from "./map.js";
+import { CELL_SIZE } from "./wall.js";
 const drawShape = new DrawShape();
 const input = new Input();
-const map = new Map();
 
 export class Player {
     constructor({position}) {
@@ -64,24 +64,23 @@ export class Player {
     }
 
     checkWall(x, y) {
-        //Treat out of bounds as collision
-        //I think I'm using map.map wrong...
-        if (x < 0 || x >= map.map.length || y < 0 || y >= map.map[0].length) {
-            return true;
+        //Ensure the coordinates are within the map bounds
+        if (x < 0 || x >= output.length || y < 0 || y >= output[0].length) {
+            return true;  //Treat out-of-bounds as collision
         }
 
-        return !map.map[x][y];
+        return output[x][y] > 0;
     }
     
     checkWallCollision(dx, dy) {
-        const newX = Math.floor(this.position.x + dx);
-        const newY = Math.floor(this.position.y + dy);
+        const newX = Math.floor((this.position.x + dx) / CELL_SIZE);
+        const newY = Math.floor((this.position.y + dy) / CELL_SIZE);
     
-        if (this.checkWall(newX, Math.floor(this.position.y))) {
+        if (!this.checkWall(newX, Math.floor(this.position.y / CELL_SIZE))) {
             this.position.x += dx;
         }
     
-        if (this.checkWall(Math.floor(this.position.x), newY)) {
+        if (!this.checkWall(Math.floor(this.position.x / CELL_SIZE), newY)) {
             this.position.y += dy;
         }
     }
