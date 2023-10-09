@@ -71,20 +71,32 @@ export class Player {
 
         return output[x][y] > 0;
     }
-    
+
     checkWallCollision(dx, dy) {
         const playerLeft = Math.floor((this.position.x + dx) / CELL_SIZE);
         const playerRight = Math.floor((this.position.x + dx + this.width) / CELL_SIZE);
         const playerTop = Math.floor((this.position.y + dy) / CELL_SIZE);
         const playerBottom = Math.floor((this.position.y + dy + this.height) / CELL_SIZE);
-    
-        //Checking left and right of player
-        if (!this.checkWall(playerLeft, Math.floor(this.position.y / CELL_SIZE)) && !this.checkWall(playerRight, Math.floor((this.position.y + this.height) / CELL_SIZE))) {
+
+        const isCollidingLeftRight = () => {
+            return this.checkWall(playerLeft, Math.floor(this.position.y / CELL_SIZE)) ||
+                   this.checkWall(playerRight, Math.floor(this.position.y / CELL_SIZE)) ||
+                   this.checkWall(playerLeft, Math.floor((this.position.y + this.height) / CELL_SIZE)) ||
+                   this.checkWall(playerRight, Math.floor((this.position.y + this.height) / CELL_SIZE));
+        };
+
+        const isCollidingTopBottom = () => {
+            return this.checkWall(Math.floor(this.position.x / CELL_SIZE), playerTop) ||
+                   this.checkWall(Math.floor((this.position.x + this.width) / CELL_SIZE), playerTop) ||
+                   this.checkWall(Math.floor(this.position.x / CELL_SIZE), playerBottom) ||
+                   this.checkWall(Math.floor((this.position.x + this.width) / CELL_SIZE), playerBottom);
+        };
+
+        if (!isCollidingLeftRight()) {
             this.position.x += dx;
         }
-    
-        //checking top and bottom of player
-        if (!this.checkWall(Math.floor(this.position.x / CELL_SIZE), playerTop) && !this.checkWall(Math.floor((this.position.x + this.width) / CELL_SIZE)), playerBottom) {
+
+        if (!isCollidingTopBottom()) {
             this.position.y += dy;
         }
     }
