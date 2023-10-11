@@ -57,9 +57,6 @@ export class Player {
         //if the angle goes over Math.PI * 2 or under Math.PI * 2, reset it to 0
         this.angle %= Math.PI * 2;
 
-        //this.position.x += dx;
-        //this.position.y += dy;
-
         this.checkWallCollision(dx, dy);
     }
 

@@ -17,6 +17,8 @@ const player = new Player({
 const map = new Map();
 //console.log(map.walls);
 
+const raycasting = new Raycasting();
+
 const update = (deltaTime) => {
     //Updating entities in the game
     player.movement(deltaTime);
@@ -28,6 +30,9 @@ const draw = () => {
 
     //Draw map
     map.draw(ctx);
+
+    //Cast rays
+    raycasting.raycast(player, ctx);
 
     //Draw player
     player.draw(ctx);
