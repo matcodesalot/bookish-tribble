@@ -1,21 +1,23 @@
 import { output } from "./map.js";
 import { DrawShape } from "./helpers/drawShape.js";
 import { CELL_SIZE } from "./wall.js";
-import { Vector2 } from "./vector2.js";
+import { Map } from "./map.js";
 
 const drawShape = new DrawShape();
+const map = new Map();
 
 export class Raycasting {
     constructor() {
         this.fov = Math.PI / 3;
         this.halfFov = this.fov / 2;
-        this.numRays = 480 / 2; //480 = canvas.width
+        this.numRays = 480; //480 = canvas.width
         this.halfNumRays = this.numRays / 2;
         this.deltaAngle = this.fov / this.numRays;
         this.maxDepth = 20;
     }
 
     distance(x1, y1, x2, y2) {
+        //Pythagorean theorem
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
@@ -25,115 +27,158 @@ export class Raycasting {
             return true;  //Treat out-of-bounds as collision
         }
 
-        return map[x][y] > 0;
+        //return map[x][y] > 0;
     }
 
-    // raycast(player, ctx) {
-    //     //Calculate the center point of the player
-    //     const playerMiddleX = player.position.x + player.width / 2;
-    //     const playerMiddleY = player.position.y + player.height / 2;
+    getVCollision(player, angle) {
+        //if this value is even, player is facing right. If it's odd, player is facing left
+        const right = Math.abs(Math.floor((angle - Math.PI / 2) / Math.PI) % 2);
 
-    //     //map unit the player is standing in (CELL_SIZE = 20)
-    //     const mapX = Math.floor(player.position.x / CELL_SIZE);
-    //     const mapY = Math.floor(player.position.y / CELL_SIZE);
+        let firstX;
 
-    //     console.log(`mapX: ${mapX}, mapY: ${mapY}`);
+        if(right) {
+            firstX = Math.floor(player.position.x / CELL_SIZE) * CELL_SIZE + CELL_SIZE;
+        } 
+        else {
+            firstX = Math.floor(player.position.x / CELL_SIZE) * CELL_SIZE;
+        }
 
-    //     let rayAngle = player.angle - this.halfFov;
+        let firstY = player.position.y + (firstX - player.position.x) * Math.tan(angle);
 
-    //     for(let rayCount = 0; rayCount <= this.numRays; rayCount++) {
-    //         let rayCos = Math.cos(rayAngle);
-    //         let raySin = Math.sin(rayAngle);
+        let stepX;
 
-    //         // let verticalStep = new Vector2();
+        if(right) {
+            stepX = CELL_SIZE;
+        }
+        else {
+            stepX = -CELL_SIZE;
+        }
 
-    //         // let x_vert;
-    //         // let dx;
-    //         // if (rayCos > 0) {
-    //         //     x_vert = mapX + 1;
-    //         //     dx = 1;
-    //         // }
-    //         // else {
-    //         //     x_vert = mapX - 1e-6;
-    //         //     dx = -1;
-    //         // }
+        let stepY = stepX * Math.tan(angle);
 
-    //         //Calculate the ending point of the line based on the ray angle
-    //         const lineEndX = playerMiddleX + rayCos * 1000;
-    //         const lineEndY = playerMiddleY + raySin * 1000;
+        let wall;
+        let nextX = firstX;
+        let nextY = firstY;
 
-    //         //Draw the ray
-    //         drawShape.line(ctx, playerMiddleX, playerMiddleY, lineEndX, lineEndY, "red");
+        //while the ray hasn't hit a wall
+        while(!wall) {
+            let cellX;
+            //facing right
+            if(right) {
+                cellX = Math.floor(nextX / CELL_SIZE);
+            }
+            //facing left
+            else {
+                cellX = Math.floor(nextX / CELL_SIZE) - 1;
+            }
 
-    //         rayAngle += this.deltaAngle;
-    //     }
-    // }
+            let cellY = Math.floor(nextY / CELL_SIZE);
 
-    raycast(player, ctx) {
+            if(this.checkWall(output, cellX, cellY)) {
+                break;
+            }
+
+            wall = output[cellX][cellY];
+
+            if(!wall) {
+                nextX += stepX;
+                nextY += stepY;
+            }
+        }
+
+        return {
+            angle,
+            distance: this.distance(player.position.x, player.position.y, nextX, nextY),
+            vertical: true
+        };
+    }
+
+    getHCollision(player, angle) {
+        const up = Math.abs(Math.floor(angle / Math.PI) % 2);
+
+        let firstY;
+
+        if(up) {
+            firstY = Math.floor(player.position.y / CELL_SIZE) * CELL_SIZE;
+        } 
+        else {
+            firstY = Math.floor(player.position.y / CELL_SIZE) * CELL_SIZE + CELL_SIZE;
+        }
+
+        let firstX = player.position.x + (firstY - player.position.y) / Math.tan(angle);
+
+        let stepY;
+
+        if(up) {
+            stepY = -CELL_SIZE;
+        }
+        else {
+            stepY = CELL_SIZE;
+        }
+
+        let stepX = stepY / Math.tan(angle);
+
+        let wall;
+        let nextX = firstX;
+        let nextY = firstY;
+
+        //while the ray hasn't hit a wall
+        while(!wall) {
+            let cellX = Math.floor(nextX / CELL_SIZE);
+            let cellY;
+            //facing up
+            if(up) {
+                cellY = Math.floor(nextY / CELL_SIZE) - 1;
+            }
+            //facing down
+            else {
+                cellY = Math.floor(nextY / CELL_SIZE);
+            }
+
+            if(this.checkWall(output, cellX, cellY)) {
+                break;
+            }
+
+            wall = output[cellX][cellY];
+
+            if(!wall) {
+                nextX += stepX;
+                nextY += stepY;
+            }
+        }
+
+        return {
+            angle,
+            distance: this.distance(player.position.x, player.position.y, nextX, nextY),
+            vertical: false
+        };
+    }
+
+    castRay(player, angle) {
+        const vCollision = this.getVCollision(player, angle);
+        const hCollision = this.getHCollision(player, angle);
+
+        return hCollision.distance >= vCollision.distance ? vCollision : hCollision;
+    }
+
+    draw(player, ctx) {
+        // Calculate the center point of the player
         const playerMiddleX = player.position.x + player.width / 2;
         const playerMiddleY = player.position.y + player.height / 2;
 
-        const mapX = Math.floor(player.position.x / CELL_SIZE);
-        const mapY = Math.floor(player.position.y / CELL_SIZE);
-        
-        let rayAngle = player.angle - this.halfFov;
-    
+        //Iterate over each ray
         for (let rayCount = 0; rayCount < this.numRays; rayCount++) {
-            let rayCos = Math.cos(rayAngle);
-            let raySin = Math.sin(rayAngle);
-    
-            let deltaX = Math.abs(1 / rayCos); // distance between vertical grid lines
-            let deltaY = Math.abs(1 / raySin); // distance between horizontal grid lines
-    
-            let step = new Vector2();
-            let mapHit = new Vector2();
-            let side;  // 0 for vertical hit, 1 for horizontal hit
-            let hit = false;
-    
-            if (rayCos < 0) {
-                step.x = -1;
-                mapHit.x = mapX * CELL_SIZE;
-            } 
-            else {
-                step.x = 1;
-                mapHit.x = mapX * CELL_SIZE + CELL_SIZE;
-            }
-    
-            if (raySin < 0) {
-                step.y = -1;
-                mapHit.y = mapY * CELL_SIZE;
-            } 
-            else {
-                step.y = 1;
-                mapHit.y = mapY * CELL_SIZE + CELL_SIZE;
-            }
-    
-            // DDA algorithm
-            while (!hit) {
-                if (deltaX < deltaY) {
-                    deltaX += Math.abs(1 / rayCos);
-                    mapHit.x += step.x * CELL_SIZE;
-                    side = 0;  // vertical hit
-                } else {
-                    deltaY += Math.abs(1 / raySin);
-                    mapHit.y += step.y * CELL_SIZE;
-                    side = 1;  // horizontal hit
-                }
+            const angle = player.angle - this.halfFov + rayCount * this.deltaAngle;
 
-                if(this.checkWall(output, Math.floor(mapHit.y / CELL_SIZE), Math.floor(mapHit.x / CELL_SIZE))) {
-                    hit = true;
-                    console.log(hit);
-                }
-            }
-    
-            // Calculate the intersection point
-            //const intersectionX = playerMiddleX + rayCos * distance * CELL_SIZE;
-            //const intersectionY = playerMiddleY + raySin * distance * CELL_SIZE;
-            
-            // Draw the ray
-            drawShape.line(ctx, playerMiddleX, playerMiddleY, mapHit.x, mapHit.y, "green");
-    
-            rayAngle += this.deltaAngle;
+            //Cast the ray and get the collision point
+            const collision = this.castRay(player, angle);
+
+            //Calculate the end point of the ray
+            const endX = player.position.x + Math.cos(angle) * collision.distance;
+            const endY = player.position.y + Math.sin(angle) * collision.distance;
+
+            //Draw the ray
+            drawShape.line(ctx, playerMiddleX, playerMiddleY, endX, endY, "yellow");
         }
     }
 }

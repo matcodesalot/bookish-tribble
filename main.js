@@ -15,7 +15,6 @@ const player = new Player({
 });
 
 const map = new Map();
-//console.log(map.walls);
 
 const raycasting = new Raycasting();
 
@@ -32,7 +31,7 @@ const draw = () => {
     map.draw(ctx);
 
     //Cast rays
-    raycasting.raycast(player, ctx);
+    raycasting.draw(player, ctx);
 
     //Draw player
     player.draw(ctx);
