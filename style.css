@@ -12,7 +12,7 @@ ol, ul {
 
 /* ------------------------- */
 
-#canvas {
+canvas {
     background-color: black;
     border: 1px solid cyan;
     margin: 20px;

@@ -39,6 +39,15 @@ export class Map {
         this.populateMap(); //Populate the map once during initialization
     }
 
+    getWallColor(symbol) {
+        if(symbol === 1) return "red"; //Red wall
+        else if(symbol === 2) return "green"; //Green wall
+        else if(symbol === 3) return "blue"; //Blue wall
+        else if(symbol === 4) return "white"; //White wall
+        else if(symbol === 5) return "yellow"; //Yellow wall
+        else return "black"; //Default color for empty space or unrecognized symbols
+    }
+
     populateMap() {
         for (let row = 0; row < this.map.length; row++) {
             for (let col = 0; col < this.map[row].length; col++) {
@@ -50,10 +59,7 @@ export class Map {
                             x: CELL_SIZE * col,
                             y: CELL_SIZE * row
                         },
-                        color: symbol === 1 ? "red" :
-                               symbol === 2 ? "green" :
-                               symbol === 3 ? "blue" :
-                               symbol === 4 ? "white" : "yellow"
+                        color: this.getWallColor(symbol)
                     }));
                 }
             }

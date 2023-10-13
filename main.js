@@ -10,6 +10,12 @@ const ctx = canvas.getContext("2d");
 canvas.width = 480;
 canvas.height = 480;
 
+const gameCanvas = document.getElementById("gameCanvas");
+const gameCtx = gameCanvas.getContext("2d");
+
+gameCanvas.width = 480;
+gameCanvas.height = 480;
+
 const player = new Player({
     position: new Vector2(240, 440)
 });
@@ -26,6 +32,7 @@ const update = (deltaTime) => {
 const draw = () => {
     //Clear screen
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    gameCtx.clearRect(0, 0, canvas.width, canvas.height);
 
     //Draw map
     map.draw(ctx);

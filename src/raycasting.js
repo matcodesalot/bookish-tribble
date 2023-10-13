@@ -21,26 +21,32 @@ export class Raycasting {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
-    checkWall(map, x, y) {
-        //Ensure the coordinates are within the map bounds
-        if (x < 0 || x >= map.length || y < 0 || y >= map[0].length) {
-            return true;  //Treat out-of-bounds as collision
-        }
+    outOfMapBounds(map, x, y) {
+        return x < 0 || x >= map.length || y < 0 || y >= map[0].length;
+    }
 
-        //return map[x][y] > 0;
+    getWallColor(symbol) {
+        if(symbol === 1) return "red"; //Red wall
+        else if(symbol === 2) return "green"; //Green wall
+        else if(symbol === 3) return "blue"; //Blue wall
+        else if(symbol === 4) return "white"; //White wall
+        else if(symbol === 5) return "yellow"; //Yellow wall
+        else return "black"; //Default color for empty space or unrecognized symbols
     }
 
     getVCollision(player, angle) {
         //if this value is even, player is facing right. If it's odd, player is facing left
         const right = Math.abs(Math.floor((angle - Math.PI / 2) / Math.PI) % 2);
 
+        const mapX = Math.floor(player.position.x / CELL_SIZE);
+
         let firstX;
 
         if(right) {
-            firstX = Math.floor(player.position.x / CELL_SIZE) * CELL_SIZE + CELL_SIZE;
+            firstX = mapX * CELL_SIZE + CELL_SIZE;
         } 
         else {
-            firstX = Math.floor(player.position.x / CELL_SIZE) * CELL_SIZE;
+            firstX = mapX * CELL_SIZE;
         }
 
         let firstY = player.position.y + (firstX - player.position.x) * Math.tan(angle);
@@ -59,7 +65,7 @@ export class Raycasting {
         let wall;
         let nextX = firstX;
         let nextY = firstY;
-
+        
         //while the ray hasn't hit a wall
         while(!wall) {
             let cellX;
@@ -74,7 +80,7 @@ export class Raycasting {
 
             let cellY = Math.floor(nextY / CELL_SIZE);
 
-            if(this.checkWall(output, cellX, cellY)) {
+            if(this.outOfMapBounds(output, cellX, cellY)) {
                 break;
             }
 
@@ -96,13 +102,15 @@ export class Raycasting {
     getHCollision(player, angle) {
         const up = Math.abs(Math.floor(angle / Math.PI) % 2);
 
+        const mapY = Math.floor(player.position.y / CELL_SIZE);
+
         let firstY;
 
         if(up) {
-            firstY = Math.floor(player.position.y / CELL_SIZE) * CELL_SIZE;
+            firstY = mapY * CELL_SIZE;
         } 
         else {
-            firstY = Math.floor(player.position.y / CELL_SIZE) * CELL_SIZE + CELL_SIZE;
+            firstY = mapY * CELL_SIZE + CELL_SIZE;
         }
 
         let firstX = player.position.x + (firstY - player.position.y) / Math.tan(angle);
@@ -135,7 +143,7 @@ export class Raycasting {
                 cellY = Math.floor(nextY / CELL_SIZE);
             }
 
-            if(this.checkWall(output, cellX, cellY)) {
+            if(this.outOfMapBounds(output, cellX, cellY)) {
                 break;
             }
 
@@ -166,19 +174,27 @@ export class Raycasting {
         const playerMiddleX = player.position.x + player.width / 2;
         const playerMiddleY = player.position.y + player.height / 2;
 
+        let rayAngle = player.angle - this.halfFov;
+
         //Iterate over each ray
         for (let rayCount = 0; rayCount < this.numRays; rayCount++) {
-            const angle = player.angle - this.halfFov + rayCount * this.deltaAngle;
+            const rayCos = Math.cos(rayAngle);
+            const raySin = Math.sin(rayAngle);
 
             //Cast the ray and get the collision point
-            const collision = this.castRay(player, angle);
+            const ray = this.castRay(player, rayAngle);
 
             //Calculate the end point of the ray
-            const endX = player.position.x + Math.cos(angle) * collision.distance;
-            const endY = player.position.y + Math.sin(angle) * collision.distance;
+            const endX = playerMiddleX + rayCos * ray.distance;
+            const endY = playerMiddleY + raySin * ray.distance;
 
-            //Draw the ray
-            drawShape.line(ctx, playerMiddleX, playerMiddleY, endX, endY, "yellow");
+            //Draw the ray: Vertical collision is blue, horizontal collision is red
+            const color = ray.vertical ? 'blue' : 'red';
+            drawShape.line(ctx, playerMiddleX, playerMiddleY, endX, endY, color);
+
+            //TODO: Draw walls
+ 
+            rayAngle += this.deltaAngle;
         }
     }
 }
