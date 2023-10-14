@@ -95,7 +95,8 @@ export class Raycasting {
         return {
             angle,
             distance: this.distance(player.position.x, player.position.y, nextX, nextY),
-            vertical: true
+            vertical: true,
+            wall
         };
     }
 
@@ -158,7 +159,8 @@ export class Raycasting {
         return {
             angle,
             distance: this.distance(player.position.x, player.position.y, nextX, nextY),
-            vertical: false
+            vertical: false,
+            wall
         };
     }
 
@@ -208,6 +210,7 @@ export class Raycasting {
         let rayAngle = player.angle - this.halfFov;
 
         //Render the floor
+        //BUG: If I comment this out and don't show the ceiling or floor, the right side of the gameCanvas fucks up.
         ctx.fillStyle = "rgb(48, 52, 59)";
         ctx.fillRect(0, canvasHeight / 2, canvasWidth, canvasHeight / 2);
 
@@ -230,7 +233,7 @@ export class Raycasting {
             const columnTop = (canvasHeight - columnHeight) / 2;
 
             //Draw the column
-            ctx.fillStyle = "white";
+            ctx.fillStyle = this.getWallColor(ray.wall);
             ctx.fillRect(rayCount * columnWidth, columnTop, columnWidth, columnHeight);
 
             rayAngle += this.deltaAngle;
