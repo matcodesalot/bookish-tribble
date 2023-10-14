@@ -10,7 +10,7 @@ export class Raycasting {
     constructor() {
         this.fov = Math.PI / 3;
         this.halfFov = this.fov / 2;
-        this.numRays = 480; //480 = canvas.width
+        this.numRays = gameCanvas.width;
         this.halfNumRays = this.numRays / 2;
         this.deltaAngle = this.fov / this.numRays;
         this.maxDepth = 20;
@@ -188,12 +188,51 @@ export class Raycasting {
             const endX = playerMiddleX + rayCos * ray.distance;
             const endY = playerMiddleY + raySin * ray.distance;
 
-            //Draw the ray: Vertical collision is blue, horizontal collision is red
-            const color = ray.vertical ? 'blue' : 'red';
-            drawShape.line(ctx, playerMiddleX, playerMiddleY, endX, endY, color);
+            //Limit the amount of rays that are being drawn on the mini-map
+            if (rayCount === 0 || rayCount === ctx.canvas.width || rayCount % 80 === 0) {
+                //Draw the ray: Vertical collision is blue, horizontal collision is red
+                const color = ray.vertical ? 'blue' : 'red';
+                drawShape.line(ctx, playerMiddleX, playerMiddleY, endX, endY, color);
+            }
 
-            //TODO: Draw walls
- 
+            rayAngle += this.deltaAngle;
+        }
+    }
+
+    draw3D(player, ctx) {
+        const canvasWidth = ctx.canvas.width;
+        const canvasHeight = ctx.canvas.height;
+    
+        const columnWidth = canvasWidth / this.numRays;
+
+        let rayAngle = player.angle - this.halfFov;
+
+        //Render the floor
+        ctx.fillStyle = "rgb(48, 52, 59)";
+        ctx.fillRect(0, canvasHeight / 2, canvasWidth, canvasHeight / 2);
+
+        //Render the ceiling
+        ctx.fillStyle = "rgb(66, 135, 245)";
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight / 2);
+    
+        //Iterate over each ray
+        for (let rayCount = 0; rayCount < this.numRays; rayCount++) {
+            //Cast the ray and get the collision point
+            const ray = this.castRay(player, rayAngle);
+
+            //Fix fish-eye effect
+            ray.distance *= Math.cos(player.angle - ray.angle);
+    
+            //Calculate the height of the column based on the distance to the wall
+            const columnHeight = (canvasHeight / ray.distance) * this.maxDepth;
+    
+            //Calculate the y-position for the top of the column
+            const columnTop = (canvasHeight - columnHeight) / 2;
+
+            //Draw the column
+            ctx.fillStyle = "white";
+            ctx.fillRect(rayCount * columnWidth, columnTop, columnWidth, columnHeight);
+
             rayAngle += this.deltaAngle;
         }
     }

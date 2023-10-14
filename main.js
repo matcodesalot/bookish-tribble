@@ -13,7 +13,7 @@ canvas.height = 480;
 const gameCanvas = document.getElementById("gameCanvas");
 const gameCtx = gameCanvas.getContext("2d");
 
-gameCanvas.width = 480;
+gameCanvas.width = 640;
 gameCanvas.height = 480;
 
 const player = new Player({
@@ -40,9 +40,21 @@ const draw = () => {
     //Cast rays
     raycasting.draw(player, ctx);
 
+    //Project 3d scene
+    raycasting.draw3D(player, gameCtx);
+
     //Draw player
     player.draw(ctx);
 }
 
 const gameLoop = new GameLoop(update, draw);
 gameLoop.start();
+
+document.addEventListener("keydown", (e) => {
+    if(e.code === "KeyJ") {
+        gameLoop.stop();
+    }
+    if(e.code === "KeyK") {
+        gameLoop.start();
+    }
+});

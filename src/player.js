@@ -10,7 +10,7 @@ export class Player {
         this.position = position;
         this.width = 8;
         this.height = 8;
-        this.angle = 0; //0: facing right, 3 * Math.PI / 2: facing up
+        this.angle = 3 * Math.PI / 2; //0: facing right, 3 * Math.PI / 2: facing up
         this.moveSpeed = 0.05;
         this.rotSpeed = 0.003;
     }
@@ -54,6 +54,7 @@ export class Player {
         if(keys.right.pressed) {
             this.angle += this.rotSpeed * timeStep;
         }
+        
         //if the angle goes over Math.PI * 2 or under Math.PI * 2, reset it to 0
         this.angle %= Math.PI * 2;
 
