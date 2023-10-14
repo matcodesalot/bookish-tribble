@@ -25,12 +25,33 @@ export class Raycasting {
         return x < 0 || x >= map.length || y < 0 || y >= map[0].length;
     }
 
-    getWallColor(symbol) {
-        if(symbol === 1) return "red"; //Red wall
-        else if(symbol === 2) return "green"; //Green wall
-        else if(symbol === 3) return "blue"; //Blue wall
-        else if(symbol === 4) return "white"; //White wall
-        else if(symbol === 5) return "yellow"; //Yellow wall
+    cmyk2rgb(c, m, y, k) {
+        c = (c / 100);
+        m = (m / 100);
+        y = (y / 100);
+        k = (k / 100);
+        
+        c = c * (1 - k) + k;
+        m = m * (1 - k) + k;
+        y = y * (1 - k) + k;
+        
+        let r = 1 - c;
+        let g = 1 - m;
+        let b = 1 - y;
+        
+        r = Math.round(255 * r);
+        g = Math.round(255 * g);
+        b = Math.round(255 * b);
+
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    getWallColor(symbol, darkness) {
+        if(symbol === 1) return this.cmyk2rgb(0, 100, 100, darkness); //Red wall
+        else if(symbol === 2) return this.cmyk2rgb(100, 0, 100, darkness); //Green wall
+        else if(symbol === 3) return this.cmyk2rgb(100, 100, 0, darkness); //Blue wall
+        else if(symbol === 4) return this.cmyk2rgb(0, 0, 0, darkness); //White wall
+        else if(symbol === 5) return this.cmyk2rgb(15, 0, 100, darkness); //Yellow wall
         else return "black"; //Default color for empty space or unrecognized symbols
     }
 
@@ -210,7 +231,7 @@ export class Raycasting {
         let rayAngle = player.angle - this.halfFov;
 
         //Render the floor
-        //BUG: If I comment this out and don't show the ceiling or floor, the right side of the gameCanvas fucks up.
+        //BUG: If I comment this out and don't show the ceiling or floor, the right side of the gameCanvas fucks up. It has to do with the width only rendering 480 pixels instead of 640.
         ctx.fillStyle = "rgb(48, 52, 59)";
         ctx.fillRect(0, canvasHeight / 2, canvasWidth, canvasHeight / 2);
 
@@ -233,7 +254,7 @@ export class Raycasting {
             const columnTop = (canvasHeight - columnHeight) / 2;
 
             //Draw the column
-            ctx.fillStyle = this.getWallColor(ray.wall);
+            ctx.fillStyle = ray.vertical ? this.getWallColor(ray.wall, 40) : this.getWallColor(ray.wall, 0);
             ctx.fillRect(rayCount * columnWidth, columnTop, columnWidth, columnHeight);
 
             rayAngle += this.deltaAngle;
