@@ -1,5 +1,7 @@
 # Sting-Ray
 
+![Sting Ray screen shot](https://github.com/matcodesalot/sting-ray/assets/20878859/6b8e4383-9775-4f27-829e-7eb539d099e2)
+
 Sting Ray is an implementation of a raycaster written in JavaScript. [Raycasting](https://en.wikipedia.org/wiki/Ray_casting) is a technique used to simulate 3D graphics by projecting rays based on a 2D plane. This method was first popularized by [Wolfenstein 3D](https://en.wikipedia.org/wiki/Wolfenstein_3D) developed by [Id Software](https://www.idsoftware.com/) in 1992.
 
 ## How the Raycaster Works
