@@ -8,7 +8,7 @@ const map = new Map();
 
 export class Raycasting {
     constructor() {
-        this.fov = Math.PI / 3;
+        this.fov = Math.PI / 3; //60 degree field of view
         this.halfFov = this.fov / 2;
         this.numRays = gameCanvas.width;
         this.halfNumRays = this.numRays / 2;
@@ -231,7 +231,6 @@ export class Raycasting {
         let rayAngle = player.angle - this.halfFov;
 
         //Render the floor
-        //BUG: If I comment this out and don't show the ceiling or floor, the right side of the gameCanvas fucks up. It has to do with the width only rendering 480 pixels instead of 640.
         ctx.fillStyle = "rgb(48, 52, 59)";
         ctx.fillRect(0, canvasHeight / 2, canvasWidth, canvasHeight / 2);
 

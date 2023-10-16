@@ -30,9 +30,9 @@ const update = (deltaTime) => {
 }
 
 const draw = () => {
-    //Clear screen
+    //Clear both mini-map screen and game screen.
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    gameCtx.clearRect(0, 0, canvas.width, canvas.height);
+    gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
     //Draw map
     map.draw(ctx);

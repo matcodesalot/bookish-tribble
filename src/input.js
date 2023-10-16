@@ -10,6 +10,9 @@ export const keys = {
     },
     right: {
         pressed: false
+    },
+    shift: {
+        pressed: false
     }
 };
 
@@ -28,6 +31,9 @@ export class Input {
             if(e.code === "ArrowRight" || e.code === "KeyD") {
                 keys.right.pressed = true;
             }
+            if(e.code === "ShiftLeft") {
+                keys.shift.pressed = true;
+            }
         });
 
         document.addEventListener("keyup", (e) => {
@@ -42,6 +48,9 @@ export class Input {
             }
             if(e.code === "ArrowRight" || e.code === "KeyD") {
                 keys.right.pressed = false;
+            }
+            if(e.code === "ShiftLeft") {
+                keys.shift.pressed = false;
             }
         });
     }

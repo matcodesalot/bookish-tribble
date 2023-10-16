@@ -29,10 +29,20 @@ export class Player {
 
         //moving forward and backward
         if(keys.up.pressed) {
+            //running forward
+            if(keys.shift.pressed) {
+                dx += speedCos * 2;
+                dy += speedSin * 2;
+            }
             dx += speedCos;
             dy += speedSin;
         }
         if(keys.down.pressed) {
+            //running backward
+            if(keys.shift.pressed) {
+                dx += -speedCos * 2;
+                dy += -speedSin * 2;
+            }
             dx += -speedCos;
             dy += -speedSin;
         }
