@@ -1,6 +1,4 @@
-import { output } from "./map.js";
 import { DrawShape } from "./helpers/drawShape.js";
-import { CELL_SIZE } from "./wall.js";
 import { Map } from "./map.js";
 
 const drawShape = new DrawShape();
@@ -8,21 +6,16 @@ const map = new Map();
 
 export class Raycasting {
     constructor() {
-        this.fov = Math.PI / 3; //60 degree field of view
-        this.halfFov = this.fov / 2;
         this.numRays = gameCanvas.width;
-        this.halfNumRays = this.numRays / 2;
-        this.deltaAngle = this.fov / this.numRays;
-        this.maxDepth = 20;
     }
 
-    distance(x1, y1, x2, y2) {
-        //Pythagorean theorem
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    }
+    checkWall(map, x, y) {
+        //Ensure the coordinates are within the map bounds
+        if (x < 0 || x >= map.length || y < 0 || y >= map[0].length) {
+            return true;  //Treat out-of-bounds as collision
+        }
 
-    outOfMapBounds(map, x, y) {
-        return x < 0 || x >= map.length || y < 0 || y >= map[0].length;
+        return map[x][y] > 0;
     }
 
     cmyk2rgb(c, m, y, k) {
@@ -55,208 +48,105 @@ export class Raycasting {
         else return "black"; //Default color for empty space or unrecognized symbols
     }
 
-    getVCollision(player, angle) {
-        //if this value is even, player is facing right. If it's odd, player is facing left
-        const right = Math.abs(Math.floor((angle - Math.PI / 2) / Math.PI) % 2);
+    raycast(player, ctx) {
+        for (let rayIndex = 0; rayIndex < this.numRays; rayIndex++) {
+            //Calculate ray position and direction
+            let cameraX = 2 * rayIndex / this.numRays - 1; //x coordinate in camera space
+            let rayDirX = player.direction.x + player.plane.x * cameraX;
+            let rayDirY = player.direction.y + player.plane.y * cameraX;
 
-        const mapX = Math.floor(player.position.x / CELL_SIZE);
+            //Which box of the map we're in
+            let mapX = Math.floor(player.position.x);
+            let mapY = Math.floor(player.position.y);
 
-        let firstX;
+            //Length of ray from current position to next x or y side
+            let sideDistX;
+            let sideDistY;
 
-        if(right) {
-            firstX = mapX * CELL_SIZE + CELL_SIZE;
-        } 
-        else {
-            firstX = mapX * CELL_SIZE;
-        }
+            //length of ray from one x or y side to next x or y side
+            let deltaDistX = (rayDirX === 0) ? 1e30 : Math.abs(1 / rayDirX);
+            let deltaDistY = (rayDirY === 0) ? 1e30 : Math.abs(1 / rayDirY);
 
-        let firstY = player.position.y + (firstX - player.position.x) * Math.tan(angle);
+            //What direction to step in. x or y direction (either +1 or -1)
+            let stepX;
+            let stepY;
 
-        let stepX;
+            //Was a wall hit
+            let hit = false;
 
-        if(right) {
-            stepX = CELL_SIZE;
-        }
-        else {
-            stepX = -CELL_SIZE;
-        }
+            //Was a north/south (horizontal) or east/west (vertical) wall hit
+            let side;
 
-        let stepY = stepX * Math.tan(angle);
-
-        let wall;
-        let nextX = firstX;
-        let nextY = firstY;
-        
-        //while the ray hasn't hit a wall
-        while(!wall) {
-            let cellX;
-            //facing right
-            if(right) {
-                cellX = Math.floor(nextX / CELL_SIZE);
+            //Calculate step and initial sideDist
+            if(rayDirX < 0) {
+                stepX = -1;
+                sideDistX = (player.position.x - mapX) * deltaDistX;
             }
-            //facing left
             else {
-                cellX = Math.floor(nextX / CELL_SIZE) - 1;
+                stepX = 1;
+                sideDistX = (mapX + 1.0 - player.position.x) * deltaDistX;
             }
 
-            let cellY = Math.floor(nextY / CELL_SIZE);
-
-            if(this.outOfMapBounds(output, cellX, cellY)) {
-                break;
+            if(rayDirY < 0) {
+                stepY = -1;
+                sideDistY = (player.position.y - mapY) * deltaDistY;
             }
-
-            wall = output[cellX][cellY];
-
-            if(!wall) {
-                nextX += stepX;
-                nextY += stepY;
-            }
-        }
-
-        return {
-            angle,
-            distance: this.distance(player.position.x, player.position.y, nextX, nextY),
-            vertical: true,
-            wall
-        };
-    }
-
-    getHCollision(player, angle) {
-        const up = Math.abs(Math.floor(angle / Math.PI) % 2);
-
-        const mapY = Math.floor(player.position.y / CELL_SIZE);
-
-        let firstY;
-
-        if(up) {
-            firstY = mapY * CELL_SIZE;
-        } 
-        else {
-            firstY = mapY * CELL_SIZE + CELL_SIZE;
-        }
-
-        let firstX = player.position.x + (firstY - player.position.y) / Math.tan(angle);
-
-        let stepY;
-
-        if(up) {
-            stepY = -CELL_SIZE;
-        }
-        else {
-            stepY = CELL_SIZE;
-        }
-
-        let stepX = stepY / Math.tan(angle);
-
-        let wall;
-        let nextX = firstX;
-        let nextY = firstY;
-
-        //while the ray hasn't hit a wall
-        while(!wall) {
-            let cellX = Math.floor(nextX / CELL_SIZE);
-            let cellY;
-            //facing up
-            if(up) {
-                cellY = Math.floor(nextY / CELL_SIZE) - 1;
-            }
-            //facing down
             else {
-                cellY = Math.floor(nextY / CELL_SIZE);
+                stepY = 1;
+                sideDistY = (mapY + 1.0 - player.position.y) * deltaDistY;
             }
 
-            if(this.outOfMapBounds(output, cellX, cellY)) {
-                break;
+            //DDA
+            while(!hit) {
+                //Jump to next map square, either in x direction or y direction
+                if(sideDistX < sideDistY) {
+                    sideDistX += deltaDistX;
+                    mapX += stepX;
+                    side = 0;
+                }
+                else {
+                    sideDistY += deltaDistY;
+                    mapY += stepY;
+                    side = 1;
+                }
+
+                //Check if ray has hit a wall
+                if(this.checkWall(map.map, mapX, mapY)) {
+                    hit = true;
+                }
             }
 
-            wall = output[cellX][cellY];
+            //Calculate distance projected on camera direction. This is the shortest distance from the point where the wall is hit to the camera plane.
+            let perpWallDist;
 
-            if(!wall) {
-                nextX += stepX;
-                nextY += stepY;
+            //Horizontal
+            if(side === 0) { 
+                perpWallDist = (sideDistX - deltaDistX);
             }
-        }
-
-        return {
-            angle,
-            distance: this.distance(player.position.x, player.position.y, nextX, nextY),
-            vertical: false,
-            wall
-        };
-    }
-
-    castRay(player, angle) {
-        const vCollision = this.getVCollision(player, angle);
-        const hCollision = this.getHCollision(player, angle);
-
-        return hCollision.distance >= vCollision.distance ? vCollision : hCollision;
-    }
-
-    draw(player, ctx) {
-        // Calculate the center point of the player
-        const playerMiddleX = player.position.x + player.width / 2;
-        const playerMiddleY = player.position.y + player.height / 2;
-
-        let rayAngle = player.angle - this.halfFov;
-
-        //Iterate over each ray
-        for (let rayCount = 0; rayCount < this.numRays; rayCount++) {
-            const rayCos = Math.cos(rayAngle);
-            const raySin = Math.sin(rayAngle);
-
-            //Cast the ray and get the collision point
-            const ray = this.castRay(player, rayAngle);
-
-            //Calculate the end point of the ray
-            const endX = playerMiddleX + rayCos * ray.distance;
-            const endY = playerMiddleY + raySin * ray.distance;
-
-            //Limit the amount of rays that are being drawn on the mini-map
-            if (rayCount === 0 || rayCount === ctx.canvas.width || rayCount % 80 === 0) {
-                //Draw the ray: Vertical collision is blue, horizontal collision is red
-                const color = ray.vertical ? 'blue' : 'red';
-                drawShape.line(ctx, playerMiddleX, playerMiddleY, endX, endY, color);
+            //Vertical
+            else {
+                perpWallDist = (sideDistY - deltaDistY);
             }
 
-            rayAngle += this.deltaAngle;
-        }
-    }
+            //Calculate height of line to draw on screen
+            let lineHeight = Math.floor(gameCanvas.height / perpWallDist);
 
-    draw3D(player, ctx) {
-        const canvasWidth = ctx.canvas.width;
-        const canvasHeight = ctx.canvas.height;
-    
-        const columnWidth = canvasWidth / this.numRays;
+            //calculate lowest and highest pixel to fill in current stripe
+            let drawStart = Math.floor(-lineHeight / 2 + gameCanvas.height / 2);
+            if (drawStart < 0) {
+                drawStart = 0;
+            }
 
-        let rayAngle = player.angle - this.halfFov;
+            let drawEnd = Math.floor(lineHeight / 2 + gameCanvas.height / 2);
+            if (drawEnd >= gameCanvas.height) {
+                drawEnd = gameCanvas.height - 1;
+            }
 
-        //Render the floor
-        ctx.fillStyle = "rgb(48, 52, 59)";
-        ctx.fillRect(0, canvasHeight / 2, canvasWidth, canvasHeight / 2);
+            //choose wall color
+            let color = side === 1 ? this.getWallColor(map.map[mapX][mapY], 40) : this.getWallColor(map.map[mapX][mapY], 0);
 
-        //Render the ceiling
-        ctx.fillStyle = "rgb(66, 135, 245)";
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight / 2);
-    
-        //Iterate over each ray
-        for (let rayCount = 0; rayCount < this.numRays; rayCount++) {
-            //Cast the ray and get the collision point
-            const ray = this.castRay(player, rayAngle);
-
-            //Fix fish-eye effect
-            ray.distance *= Math.cos(player.angle - ray.angle);
-    
-            //Calculate the height of the column based on the distance to the wall
-            const columnHeight = (canvasHeight / ray.distance) * this.maxDepth;
-    
-            //Calculate the y-position for the top of the column
-            const columnTop = (canvasHeight - columnHeight) / 2;
-
-            //Draw the column
-            ctx.fillStyle = ray.vertical ? this.getWallColor(ray.wall, 40) : this.getWallColor(ray.wall, 0);
-            ctx.fillRect(rayCount * columnWidth, columnTop, columnWidth, columnHeight);
-
-            rayAngle += this.deltaAngle;
+            //draw rays
+            drawShape.line(ctx, rayIndex, drawStart, rayIndex, drawEnd, color, 1);
         }
     }
 }

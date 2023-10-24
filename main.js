@@ -17,7 +17,7 @@ gameCanvas.width = 640;
 gameCanvas.height = 480;
 
 const player = new Player({
-    position: new Vector2(240, 440)
+    position: new Vector2(22, 12)
 });
 
 const map = new Map();
@@ -34,17 +34,14 @@ const draw = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
-    //Draw map
+    //Draw map (2d)
     map.draw(ctx);
 
     //Cast rays
-    raycasting.draw(player, ctx);
+    raycasting.raycast(player, gameCtx);
 
-    //Project 3d scene
-    raycasting.draw3D(player, gameCtx);
-
-    //Draw player
-    player.draw(ctx);
+    //Draw player (2d)
+    //player.draw(ctx);
 }
 
 const gameLoop = new GameLoop(update, draw);
